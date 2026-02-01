@@ -1,0 +1,45 @@
+.stack-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100dvh;
+  background: #111;
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* Đây là cái khung thẻ bài */
+.physics-card {
+  /* Bo góc cực mượt */
+  border-radius: 20px; 
+  /* Cắt ảnh thừa */
+  overflow: hidden; 
+  /* Đổ bóng cho có chiều sâu */
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+  /* Viền trắng nhẹ nếu thích */
+  border: 2px solid rgba(255,255,255,0.1); 
+  /* Màu nền dự phòng */
+  background: #222; 
+}
+
+/* Ảnh bên trong */
+.physics-card img {
+  width: 100%;
+  height: 100%;
+  /* QUAN TRỌNG: Tự động scale và crop ảnh vừa khít khung */
+  object-fit: cover; 
+  display: block;
+  pointer-events: none; /* Chặn kéo thả ảnh trên mobile */
+}
+
+/* Overlay xin quyền */
+.permission-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 100;
+}
+.start-btn {
+    /* Style nút cũ của bạn */
+    padding: 15px 30px; border-radius: 50px; border: none; font-size: 18px; font-weight: bold; background: white;
+}
