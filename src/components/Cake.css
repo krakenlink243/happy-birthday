@@ -1,0 +1,183 @@
+/* --- KHUNG BAO BÁNH --- */
+.cake-wrapper {
+  position: relative;
+  display: flex; justify-content: center; align-items: flex-end;
+  width: 300px; height: 300px;
+  perspective: 1000px;
+  transform: scale(0.9);
+}
+
+.cake-body {
+  position: relative;
+  width: 260px; height: 180px;
+  margin-bottom: 50px;
+  z-index: 1;
+}
+
+/* --- PLATE --- */
+.plate {
+  position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+  width: 320px; height: 120px;
+  background: radial-gradient(ellipse at center, #fff 0%, #f5f5f5 40%, #e0e0e0 100%);
+  border-radius: 50%; border: 4px solid #fff;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 0;
+}
+
+/* --- [ĐÃ XÓA] BOTTOM BORDER (Viền kem chân bánh) --- */
+/* .bottom-border { ... } -> Phần này đã bị xóa theo yêu cầu */
+
+/* --- CỐT BÁNH --- */
+.layer { position: absolute; width: 100%; border-radius: 50%; }
+
+.layer-bottom {
+  bottom: 0; height: 100px; z-index: 1;
+  background: linear-gradient(to right, #cd84f1, #ffcccc 45%, #ffcccc 55%, #cd84f1);
+  border-radius: 50% 50% 50% 50% / 20% 20% 10% 10%;
+}
+.layer-middle {
+  bottom: 45px; height: 80px; z-index: 2; transform: scaleX(0.98);
+  background: linear-gradient(to right, #c56cf0, #ffb8b8 45%, #ffb8b8 55%, #c56cf0);
+  border-radius: 50% 50% 50% 50% / 20% 20% 10% 10%;
+}
+.layer-top {
+  bottom: 90px; height: 80px; z-index: 3;
+  background: linear-gradient(to right, #cd84f1, #ffcccc 45%, #ffcccc 55%, #cd84f1);
+  border-radius: 50% 50% 50% 50% / 20% 20% 10% 10%;
+}
+
+/* --- LỚP SOCOLA --- */
+.chocolate-layer {
+  position: absolute;
+  top: -12px; left: 50%; transform: translateX(-50%);
+  width: 280px; height: 100%; z-index: 10; pointer-events: none;
+}
+
+.icing-top {
+  position: absolute; top: 10px; left: 0;
+  width: 100%; height: 90px;
+  background: radial-gradient(ellipse at center, #8d6e63 20%, #5d4037 100%);
+  border-radius: 50%;
+  box-shadow: inset 0 -5px 15px rgba(0,0,0,0.3);
+  z-index: 2;
+  overflow: hidden; 
+}
+
+/* SPRINKLES (Cốm) */
+.icing-top::after {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 4px; height: 6px; border-radius: 2px; opacity: 0.8;
+  box-shadow: 
+    20px 20px #ffeb3b, 50px 30px #ff9ff3, 80px 10px #54a0ff,
+    120px 40px #ffeb3b, 150px 20px #ff9ff3, 180px 50px #54a0ff,
+    220px 30px #ffeb3b, 250px 10px #ff9ff3, 30px 60px #54a0ff,
+    70px 70px #ffeb3b, 100px 50px #ff9ff3, 140px 80px #54a0ff,
+    190px 60px #ffeb3b, 230px 70px #ff9ff3, 260px 40px #54a0ff,
+    40px 40px #ffeb3b, 160px 35px #ff9ff3, 90px 25px #54a0ff,
+    10px 80px #ffeb3b, 270px 60px #ff9ff3, 200px 20px #54a0ff;
+  transform: rotate(15deg);
+}
+
+.drips {
+  position: absolute; top: 55px; left: 0;
+  width: 100%; height: 60px;
+  display: flex; justify-content: space-between; 
+  padding: 0 15px; box-sizing: border-box;
+  z-index: 1; 
+  filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+}
+.drip {
+  width: 35px; background: #5d4037;
+  border-radius: 0 0 20px 20px; margin-top: -1px; 
+}
+.drip:nth-child(1) { height: 50px; }
+.drip:nth-child(2) { height: 75px; width: 40px; }
+.drip:nth-child(3) { height: 45px; }
+.drip:nth-child(4) { height: 65px; width: 30px; }
+.drip:nth-child(5) { height: 55px; }
+
+/* TOPPINGS (Cherry) */
+.toppings {
+  position: absolute; top: 20px; left: 0; width: 100%;
+  z-index: 25; pointer-events: none;
+}
+.cherry {
+  position: absolute; width: 22px; height: 20px;
+  background: radial-gradient(circle at 30% 30%, #ff5252, #c62828);
+  border-radius: 50%;
+  box-shadow: inset -2px -2px 5px rgba(0,0,0,0.3), 2px 5px 5px rgba(0,0,0,0.2);
+}
+.cherry::before {
+  content: ''; position: absolute; top: -8px; left: 50%;
+  width: 2px; height: 8px; background: #5d4037;
+  transform: rotate(15deg); border-radius: 2px;
+}
+.c1 { left: 30px; top: 10px; transform: rotate(-10deg); }
+.c2 { right: 40px; top: 5px; transform: rotate(20deg); }
+.c3 { left: 50%; top: -5px; margin-left: -11px; }
+
+/* --- NẾN SỐ 21 --- */
+.candles {
+  position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+  width: 130px; z-index: 20;
+  display: flex; justify-content: space-between; align-items: flex-end;
+}
+.candle { position: relative; width: 60px; height: 80px; display: flex; justify-content: center; }
+
+.wax {
+  position: absolute; bottom: 0;
+  font-family: 'Arial Black', sans-serif;
+  font-size: 90px; line-height: 90px; font-weight: 900;
+  color: transparent;
+  background: repeating-linear-gradient(
+    -45deg, #ff9ff3, #ff9ff3 10px, #ffeaa7 10px, #ffeaa7 20px
+  );
+  -webkit-background-clip: text; background-clip: text;
+  filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.15));
+}
+.wick {
+  position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 15px; background: #555; border-radius: 2px; z-index: 5;
+}
+
+/* --- FLAME (NGỌN LỬA ĐÃ NÂNG CẤP) --- */
+.flame {
+  position: absolute; bottom: 100%; left: 50%;
+  /* Form thon gọn hơn */
+  width: 18px; height: 30px;
+  border-radius: 50% 50% 20% 20%;
+  transform-origin: center bottom;
+  z-index: 30;
+  margin-left: -9px; margin-bottom: -3px; 
+  transition: all 0.5s ease;
+}
+
+.flame.lit {
+  /* Gradient mới: Lõi trắng nóng -> Vàng -> Cam đỏ ở ngọn */
+  background: radial-gradient(ellipse at center bottom, #ffffd1 10%, #ffdb4d 30%, #ff5722 80%, rgba(255,87,34,0) 100%);
+  
+  /* Hiệu ứng Glow đa lớp rực rỡ hơn */
+  box-shadow:
+    0 -2px 5px 1px rgba(255, 219, 77, 0.7), /* Vàng gần */
+    0 -5px 20px 2px rgba(255, 87, 34, 0.4),  /* Cam xa */
+    0 5px 15px rgba(255, 255, 255, 0.3) inset; /* Sáng chân nến */
+    
+  /* Animation mới: Nhấp nháy nhanh và tự nhiên hơn */
+  animation: flame-flicker 1s infinite ease-in-out alternate;
+  opacity: 1;
+}
+
+.flame.out {
+  background: #b0bec5; width: 8px; height: 8px;
+  margin-left: -4px; margin-bottom: 5px;
+  border-radius: 50%; opacity: 0; 
+  transform: translateY(-20px) scale(0);
+}
+
+/* Keyframes mới cho lửa cháy */
+@keyframes flame-flicker {
+  0%   { transform: scale(1) rotate(-2deg); opacity: 1; }
+  25%  { transform: scale(1.05, 0.95) rotate(1deg) translateY(-1px); opacity: 0.9; }
+  50%  { transform: scale(0.95, 1.05) rotate(-1deg); opacity: 1; }
+  75%  { transform: scale(1.02, 0.98) rotate(2deg) translateY(-0.5px); opacity: 0.95; }
+  100% { transform: scale(1) rotate(-2deg); opacity: 1; }
+}

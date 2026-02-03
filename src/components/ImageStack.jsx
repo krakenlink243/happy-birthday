@@ -2,67 +2,75 @@ import { useEffect, useRef, useState } from "react";
 import Matter from "matter-js";
 import "./ImageStack.css";
 
+// --- KHÔNG CẦN IMPORT NỮA ---
+// Vì ảnh nằm trong thư mục public, ta dùng đường dẫn tuyệt đối
+const IMAGE_LIST = [
+  "/i1.jpg",
+  "/i2.png",
+  "/i3.png",
+  "/i4.png",
+  "/i5.png",
+  "/i6.png"
+];
+
 export default function ImageStack({ onFinish }) {
   const cardRefs = useRef({}); 
   const engineRef = useRef(null);
   const runnerRef = useRef(null);
   const bodiesRef = useRef({}); 
-  
   const lastAccRef = useRef(null);
   const isReadyRef = useRef(false);
+  
+  const draggingIdRef = useRef(null);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const lastDragPosRef = useRef({ x: 0, y: 0, time: 0 });
 
-  const [items, setItems] = useState([
-    { id: "img1", src: "/i1.png" },
-    { id: "img2", src: "/i2.png" },
-    { id: "img3", src: "/i3.png" },
-  ]);
+  const [showHint, setShowHint] = useState(false);
 
-  const [motionEnabled, setMotionEnabled] = useState(false);
+  const [items, setItems] = useState(() => {
+    return IMAGE_LIST.map((imgSrc, index) => ({
+      id: `img-${index}`,
+      src: imgSrc, // Đường dẫn trực tiếp từ public
+      styleVars: {
+        '--rnd-x': `${(Math.random() - 0.5) * 500}px`,
+        '--rnd-y': `${(Math.random() - 0.5) * 500}px`,
+        '--rnd-rot': `${(Math.random() - 0.5) * 45}deg`,
+        '--delay': `${index * 0.15}s`
+      }
+    }));
+  });
 
   const width = window.innerWidth;
   const height = window.innerHeight;
-  // Card to bằng 60% chiều rộng màn hình
-  const cardWidth = Math.min(width, height) * 0.6;
+  const cardWidth = Math.min(width, height) * 0.7; 
   const cardHeight = cardWidth * (4/3); 
 
-  const requestMotionPermission = async () => {
-    if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
-      try {
-        const res = await DeviceMotionEvent.requestPermission();
-        setMotionEnabled(res === "granted");
-      } catch (e) { setMotionEnabled(true); }
-    } else { setMotionEnabled(true); }
-  };
-
   useEffect(() => {
-    if (!motionEnabled) return;
-
     const engine = Matter.Engine.create();
     const runner = Matter.Runner.create();
     
     engineRef.current = engine;
     runnerRef.current = runner;
-
     engine.world.gravity.y = 0;
     engine.world.gravity.x = 0;
 
     const newBodies = {};
     items.forEach(item => {
-        const paddingX = cardWidth / 2 + 20;
-        const paddingY = cardHeight / 2 + 20;
-        const safeX = Math.random() * (width - 2 * paddingX) + paddingX;
-        const safeY = Math.random() * (height - 2 * paddingY) + paddingY;
+        const paddingX = cardWidth / 2 + 10;
+        const paddingY = cardHeight / 2 + 10;
+        const safeX = Math.max(paddingX, Math.min(width - paddingX, Math.random() * width));
+        const safeY = Math.max(paddingY, Math.min(height - paddingY, Math.random() * height));
+        const randomDensity = 0.001 + Math.random() * 0.001;
 
         const body = Matter.Bodies.rectangle(safeX, safeY, cardWidth, cardHeight, {
             inertia: Infinity, 
-            angle: (Math.random() - 0.5) * 0.4, 
-            frictionAir: 0.1, // Khóa cứng lúc đầu
-            restitution: 0.5,
-            density: 0.002,
+            angle: (Math.random() - 0.5) * 0.5,
+            frictionAir: 0.1, 
+            restitution: 0.6, 
+            density: randomDensity,
             collisionFilter: { group: -1 }, 
             label: item.id
         });
-        
         newBodies[item.id] = body;
     });
 
@@ -82,11 +90,8 @@ export default function ImageStack({ onFinish }) {
                 const angle = body.angle;
                 domEl.style.transform = `translate3d(${x - cardWidth/2}px, ${y - cardHeight/2}px, 0) rotate(${angle}rad)`;
 
-                const buffer = 200;
-                if (
-                    x < -buffer || x > width + buffer ||
-                    y < -buffer || y > height + buffer
-                ) {
+                const buffer = 500;
+                if (x < -buffer || x > width + buffer || y < -buffer || y > height + buffer) {
                     Matter.World.remove(engine.world, body);
                     delete bodiesRef.current[id];
                     setItems(prev => prev.filter(i => i.id !== id));
@@ -102,10 +107,18 @@ export default function ImageStack({ onFinish }) {
     Matter.Runner.run(runner, engine);
 
     setTimeout(() => {
-        isReadyRef.current = true;
-        // === SIÊU TRƠN ===
-        // Giảm ma sát xuống 0.005 (gần như trôi tự do trong không gian)
-        Object.values(bodiesRef.current).forEach(b => b.frictionAir = 0.005);
+        isReadyRef.current = true; 
+        Object.values(bodiesRef.current).forEach(b => {
+             b.frictionAir = 0.001 + Math.random() * 0.002;
+        });
+        
+        setTimeout(() => {
+            if (Object.keys(bodiesRef.current).length > 0) {
+                setShowHint(true);
+                setTimeout(() => setShowHint(false), 3000);
+            }
+        }, 1500);
+
     }, 1000);
 
     const handleShake = (e) => {
@@ -122,23 +135,21 @@ export default function ImageStack({ onFinish }) {
         const deltaY = acc.y - lastAccRef.current.y;
         const deltaZ = acc.z - lastAccRef.current.z;
         lastAccRef.current = { x: acc.x, y: acc.y, z: acc.z };
-
         const shakeForce = Math.abs(deltaX) + Math.abs(deltaY) + Math.abs(deltaZ);
 
-        // === ĐỘ NHẠY CỰC CAO ===
-        // Ngưỡng 0.8: Chỉ cần tay hơi rung nhẹ là nhận
         if (shakeForce < 0.8) return; 
 
-        // === TĂNG SỨC MẠNH ===
-        // Hệ số 0.03 (x3 lần bản cũ)
-        // Số mũ 1.1 (Giảm xuống gần tuyến tính để lắc nhẹ cũng ra lực mạnh)
-        const powerMultiplier = 0.03 * Math.pow(shakeForce, 1.1);
+        const DIR_X = -1; const DIR_Y = 1;  
+        const powerMultiplier = 0.002 * Math.pow(shakeForce, 1.4);
 
         Object.values(bodiesRef.current).forEach(body => {
-            const spread = shakeForce * 0.01;
-            const forceX = (deltaX * powerMultiplier) + (Math.random() - 0.5) * spread;
-            const forceY = -(deltaY * powerMultiplier) + (Math.random() - 0.5) * spread;
-
+            if (body.label === draggingIdRef.current) return;
+            const individualSensitivity = 0.5 + Math.random();
+            const spread = shakeForce * 0.02; 
+            const randomDirX = (Math.random() - 0.5) * spread;
+            const randomDirY = (Math.random() - 0.5) * spread;
+            const forceX = (deltaX * powerMultiplier * individualSensitivity * DIR_X) + randomDirX;
+            const forceY = (deltaY * powerMultiplier * individualSensitivity * DIR_Y) + randomDirY;
             Matter.Body.applyForce(body, body.position, { x: forceX, y: forceY });
         });
     };
@@ -152,34 +163,77 @@ export default function ImageStack({ onFinish }) {
         bodiesRef.current = {};
         isReadyRef.current = false;
     };
-  }, [motionEnabled]);
+  }, []);
+
+  const handleTouchStart = (e, id) => {
+    const body = bodiesRef.current[id];
+    if (!body) return;
+    const touch = e.touches[0];
+    draggingIdRef.current = id;
+    dragOffsetRef.current = { x: touch.clientX - body.position.x, y: touch.clientY - body.position.y };
+    lastDragPosRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+    Matter.Body.setStatic(body, true);
+  };
+  const handleGlobalTouchMove = (e) => {
+      if(!draggingIdRef.current) return;
+      const touch = e.touches[0];
+      const now = Date.now();
+      const vx = touch.clientX - lastDragPosRef.current.x;
+      const vy = touch.clientY - lastDragPosRef.current.y;
+      const body = bodiesRef.current[draggingIdRef.current];
+      if(body) {
+          Matter.Body.setPosition(body, { 
+              x: touch.clientX - dragOffsetRef.current.x, 
+              y: touch.clientY - dragOffsetRef.current.y 
+          });
+          body.customVelocity = { x: vx, y: vy };
+      }
+      lastDragPosRef.current = { x: touch.clientX, y: touch.clientY, time: now };
+  };
+  const handleGlobalTouchEnd = () => {
+      if(!draggingIdRef.current) return;
+      const body = bodiesRef.current[draggingIdRef.current];
+      if(body) {
+          Matter.Body.setStatic(body, false);
+          if (body.customVelocity) {
+              const throwForce = 0.05; 
+              Matter.Body.applyForce(body, body.position, { 
+                  x: body.customVelocity.x * throwForce, 
+                  y: body.customVelocity.y * throwForce 
+              });
+              body.customVelocity = null; 
+          }
+      }
+      draggingIdRef.current = null;
+  };
 
   return (
-    <div className="stack-container">
-      {!motionEnabled && (
-        <div className="permission-overlay">
-          <button className="start-btn" onClick={requestMotionPermission}>
-            Lắc để xem
-          </button>
-        </div>
-      )}
+    <div className="stack-container" onTouchMove={handleGlobalTouchMove} onTouchEnd={handleGlobalTouchEnd}>
+      
+      <div className={`hint-overlay ${showHint ? 'visible' : ''}`}>
+        <p>💡 Nếu thấy vướng quá thì thử <b>hất điện thoại</b> xem...</p>
+      </div>
 
       {items.map((item) => (
-        <div
-          key={item.id}
-          ref={el => cardRefs.current[item.id] = el}
-          className="physics-card"
+        <div 
+          key={item.id} 
+          ref={el => cardRefs.current[item.id] = el} 
+          className="physics-card" 
+          onTouchStart={(e) => handleTouchStart(e, item.id)}
           style={{
-            width: cardWidth,
-            height: cardHeight,
-            position: 'absolute',
-            top: 0, 
-            left: 0,
-            willChange: 'transform', 
-            transform: 'translate3d(-9999px, -9999px, 0)' 
+            width: cardWidth, height: cardHeight, 
+            position: 'absolute', top: 0, left: 0,
           }}
         >
-          <img src={item.src} alt="" />
+          <div 
+            className="card-inner" 
+            style={{
+                ...item.styleVars, 
+                animationDelay: item.styleVars['--delay'] 
+            }}
+          >
+            <img src={item.src} alt="" loading="lazy" />
+          </div>
         </div>
       ))}
     </div>
