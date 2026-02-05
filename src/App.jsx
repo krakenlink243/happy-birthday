@@ -144,7 +144,7 @@ function App() {
   if (!hasStarted) {
     return (
       <div className="start-screen">
-        <h1 className="title">Woaa, hình như có người +1 tuổi</h1>
+        <h1 className="title">Woaa, hình như có người +10 tuổi</h1>
         <p className="subtitle">Let's have a look at your 19th</p>
         <button className="btn-start" onClick={handleStartExperience}>BẮT ĐẦU</button>
       </div>
