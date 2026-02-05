@@ -39,7 +39,6 @@ jobs:
               cd happy
               docker compose pull
               docker compose up -d
-              docker restart gate
               docker image prune -f
             
             
