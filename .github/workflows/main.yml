@@ -1,0 +1,47 @@
+name: CI/CD
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  buildimg-docker:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: cpy code to gh
+        uses: actions/checkout@v4
+
+      - name: auth docker
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: krakenlink/vite-app:v1
+
+  deploy-gcp:
+      needs: buildimg-docker
+      runs-on: ubuntu-24.04
+      steps:
+        - name: ssh-gcp
+          uses: appleboy/ssh-action@v1.0.3
+          with:
+            host: ${{ secrets.HOST_IP }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            username: ${{ secrets.HOST_USER }}
+            script: |
+              cd happy
+              docker compose pull
+              docker compose up -d
+              docker image prune -f
+            
+            
+  
+    
+      
