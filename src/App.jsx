@@ -7,7 +7,7 @@ import emailjs from '@emailjs/browser';
 import "./App.css";
 
 // Link nhạc (Mình để sẵn link Github, bạn có thể thay bằng link khác)
-const BIRTHDAY_SONG_URL = "m.mp3";
+const BIRTHDAY_SONG_URL = "";
 
 function App() {
   const [hasStarted, setHasStarted] = useState(false);
@@ -145,7 +145,7 @@ function App() {
     return (
       <div className="start-screen">
         <h1 className="title">Woaa, hình như có người +1 tuổi</h1>
-        <p className="subtitle">Let's have a look at your 20th</p>
+        <p className="subtitle">Let's have a look at your 19th</p>
         <button className="btn-start" onClick={handleStartExperience}>BẮT ĐẦU</button>
       </div>
     );
